@@ -95,7 +95,7 @@ if (r.x1 < l.x1):
 if (r.dot and l.dot): # 점-점
     if (l.x1 == r.x1 and l.x2 == r.x2 and l.y1 == r.y1 and l.y2 == r.y2):
        print(1);
-       #print(l.x1, l.y1);
+       print(l.x1, l.y1);
        quit();
     else:
         print(0);
@@ -111,14 +111,14 @@ if (l.dot == 1):
             quit();
         elif checkRange(r.y1,r.y2,l.y1):
             print(1);
-            #print(l.x1, l.y1);
+            print(l.x1, l.y1);
             quit();
         else:
             print(0);
             quit();
     elif (r.m * l.x1 + r.k == l.y1): #점-일반
         print(1);
-        #print(l.x1, l.y1);
+        print(l.x1, l.y1);
         quit();
     else:
         print(0);
@@ -139,7 +139,7 @@ if(l.ver and r.ver): # 수직-수직
         r = temp;
     if l.y2 == r.y1:
         print(1);
-        #print(l.x2, l.y2);
+        print(l.x2, l.y2);
         quit();
     elif checkRange(l.y1, l.y2, r.y1):
         print(1);
@@ -157,7 +157,7 @@ else:               # 수직 - 일반
         ans = r.m * l.x1 + r.k;
         if (checkRange(r.x1, r.x2, l.x1) and checkRange(l.y1, l.y2, ans)):
             print(1);
-            #print(l.x1, ans);
+            print(l.x1, ans);
             quit();
         else :
             print(0);
@@ -175,7 +175,7 @@ if((l.hor and r.hor) or (l.m == r.m)):
     else:           # 무한해
         if (l.x2 == r.x1): 
             print(1);
-            #print(l.x2, l.x2 * l.m + l.k);
+            print(l.x2, l.x2 * l.m + l.k);
             quit();
         elif checkRange(l.x1, l.x2, r.x1):
             print(1);
@@ -192,7 +192,7 @@ ans = r.m * ansX + r.k;
 
 if (checkRange(l.x1,l.x2, ansX) and checkRange(r.x1,r.x2, ansX) and checkRange(l.y1,l.y2, ans) and checkRange(r.y1,r.y2, ans)):
     print(1);
-    #print(ansX,ans);
+    print(ansX,ans);
     quit();
 else:
     print(0);
