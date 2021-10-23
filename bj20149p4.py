@@ -65,9 +65,9 @@ class line():
             self.y2 = temp;
 
 def checkRange(a1,a2,ans):
-    if a1 <= a2 and a1 <= ans and ans <= a2:
+    if a1 <= a2 and a1-0.00000001 <= ans and ans <= a2+0.00000001:
         return(1);
-    elif a1 >= a2 and a2 <= ans and ans <= a1:
+    elif a1 >= a2 and a2-0.00000001 <= ans and ans <= a1+0.00000001:
         return(1);
     return(0);
 
