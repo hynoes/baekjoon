@@ -1,4 +1,3 @@
-#실패
 # 분할정복을 처음부터 공부해보자
 
 # (sorted, key, **를 배웠다)
@@ -55,6 +54,7 @@
 #아이디어 4
 # 새로운 mini를 구할 때 마다 처음부터 시작(진행상황을 저장하기 어려움), 가로세로 2mini 만큼 쪼개서 진행. 2mini의 열벡터단위로 진행, 열벡터는 다시 2mini씩 세로로 쪼개짐.
 # nextStart위치 잘 선정하기, 코드보수결과 10프로까지 도달했는데 틀림
+# append에서 미리선언으로 바꿨는데 오히려 살짝 느려진듯.
 
 
 
@@ -66,7 +66,7 @@ class point:
         self.y = int(coor[1]);
 
 """
-f = open("baekjoon/case2261_0.txt", "r");
+f = open("baekjoon/case2261_3.txt", "r");
 
 n = int(f.readline());
 po = [point([0, 0])] * n;
@@ -80,12 +80,13 @@ for i in range(0,n):
     po[i] = point(input().split());
 
 
+
 poX = sorted(po,key=lambda point: point.x);
 #poY = sorted(po,key=lambda point: point.y);
 
 
 rtn = (poX[1].x-poX[0].x) ** 2 + (poX[1].y - poX[0].y) ** 2;
-mini = int(rtn ** 0.5) + 1;
+mini = rtn ** 0.5 + 0.0001;
 absum = mini ** 1.4143;
 
 
@@ -94,6 +95,8 @@ resetFlag = 0;
 nextStart = 0;
 start = 0;
 
+time = 0;
+
 while (i < n):
     i = nextStart;
     m = 1;
@@ -101,22 +104,21 @@ while (i < n):
         i = 0;
     resetFlag = 1;
     nextFlag = 1;
-    section = [];
-    nextStart = 0;
-    while (i + m < n and poX[i + m].x - poX[i].x < mini * 10000):
-        if (nextFlag and poX[i + m].x - poX[i].x > mini * 1):
+    while (i + m < n and poX[i + m].x - poX[i].x < mini * 1.1):
+        if (nextFlag and poX[i + m].x - poX[i].x > mini * 0.9):
             nextStart = i + m;
             nextFlag = 0;
-        section.append(poX[i + m - 1]);
         m += 1;
-    if (i + m - 1 < n):
-        section.append(poX[i + m - 1]);
+    section = [point([0, 0])] * m;
+    for r in range(0, m):
+        section[r] = poX[r + i];
 
     section = sorted(section, key=lambda point: point.y);
     j = 0;
     while (j < len(section) - 1 and resetFlag):
         k = 1;
         while(resetFlag):
+            time += 1;
             tempY = section[j + k].y - section[j].y;
             if (tempY > mini):
                 break;
@@ -125,7 +127,7 @@ while (i < n):
                 ans = (tempX ** 2 + tempY ** 2);
                 if ans < rtn:
                     rtn = ans;
-                    mini = rtn ** 0.5;
+                    mini = rtn ** 0.5 + 0.0001;
                     absum = mini * 1.4143;
                     resetFlag = 0;
             k += 1;
@@ -133,7 +135,8 @@ while (i < n):
                 break;
         j += 1;
     
-    if nextStart == 0 and resetFlag == 1:
+    if nextFlag == 1 and resetFlag == 1:
         break;
 
 print(rtn);
+#print('time:',time);
