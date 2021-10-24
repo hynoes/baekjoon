@@ -47,7 +47,14 @@
 # xmin과 ymin을 완전히 mini로 통합하기. mini값을 구할 때 이웃한 칸이 아닌 칸도 조사할  수 있게하기 -> 밑에 내용을 그대로 수행하는게 아닌가? 머리가 잘 안돌아감
 
 #아이디어 3
-# 처음부터 ans와 mini = ans ** 0.5를 계속 줄여나가면서 문제 풀기
+# 처음부터 ans와 mini = ans ** 0.5를 계속 줄여나가면서 문제 풀기 -> 6프로 틀림
+# rtn이 너무 작은 문제 -> 해결함 -> 8프로 시간초과
+# 근본적인 문제. 모든 점들의 간격이 1배 ~ 1.4배로 비슷하면, 즉 특수케이스가 없으면 거의 모든 경우의수를 정직하게 계산해야함.
+# absum 변수로 tempX+tempY의 값이 최소선분길이의 루트2배, 45도가 될때 최대인점을 감안해서 이 이하로 들어올때만 계산을 하도록 최적화.
+
+#아이디어 4
+# 새로운 mini를 구할 때 마다 처음부터 시작(진행상황을 저장하기 어려움), 가로세로 2mini 만큼 쪼개서 진행. 2mini의 열벡터단위로 진행, 열벡터는 다시 2mini씩 세로로 쪼개짐.
+# nextStart위치 잘 선정하기, 코드보수결과 10프로까지 도달했는데 틀림
 
 
 
@@ -58,6 +65,15 @@ class point:
         self.x = int(coor[0]);
         self.y = int(coor[1]);
 
+"""
+f = open("baekjoon/case2261_0.txt", "r");
+
+n = int(f.readline());
+po = [point([0, 0])] * n;
+for i in range(0,n):
+    po[i] = point(f.readline().split());
+"""
+
 n = int(input());
 po = [point([0, 0])] * n;
 for i in range(0,n):
@@ -65,108 +81,59 @@ for i in range(0,n):
 
 
 poX = sorted(po,key=lambda point: point.x);
-poY = sorted(po,key=lambda point: point.y);
+#poY = sorted(po,key=lambda point: point.y);
 
 
-mini = 100000;
-rtn = 100000;
+rtn = (poX[1].x-poX[0].x) ** 2 + (poX[1].y - poX[0].y) ** 2;
+mini = int(rtn ** 0.5) + 1;
+absum = mini ** 1.4143;
 
-for i in range(0, n - 1):
-    j = 1;
-    while (1):
-        tempX = poX[i + j].x - poX[i].x;
-        tempY = abs(poX[i + j].y - poX[i].y);
-        if tempX >= mini:
-            break;
-        if (tempY <= mini):
-            ans = (tempX ** 2 + tempY ** 2);
-            if ans < rtn:
-                rtn = ans;
-                mini = rtn ** 0.5;
+
+endFlag = 0;
+resetFlag = 0;
+nextStart = 0;
+start = 0;
+
+while (i < n):
+    i = nextStart;
+    m = 1;
+    if (resetFlag == 0):
+        i = 0;
+    resetFlag = 1;
+    nextFlag = 1;
+    section = [];
+    nextStart = 0;
+    while (i + m < n and poX[i + m].x - poX[i].x < mini * 10000):
+        if (nextFlag and poX[i + m].x - poX[i].x > mini * 1):
+            nextStart = i + m;
+            nextFlag = 0;
+        section.append(poX[i + m - 1]);
+        m += 1;
+    if (i + m - 1 < n):
+        section.append(poX[i + m - 1]);
+
+    section = sorted(section, key=lambda point: point.y);
+    j = 0;
+    while (j < len(section) - 1 and resetFlag):
+        k = 1;
+        while(resetFlag):
+            tempY = section[j + k].y - section[j].y;
+            if (tempY > mini):
+                break;
+            tempX = abs(section[j + k].x - section[j].x);
+            if (tempX + tempY < absum):
+                ans = (tempX ** 2 + tempY ** 2);
+                if ans < rtn:
+                    rtn = ans;
+                    mini = rtn ** 0.5;
+                    absum = mini * 1.4143;
+                    resetFlag = 0;
+            k += 1;
+            if (j + k == len(section)):
+                break;
         j += 1;
-        if i + j == n:
-            break;
+    
+    if nextStart == 0 and resetFlag == 1:
+        break;
 
-for i in range(0, n - 1):
-    j = 1;
-    while (1):
-        tempY = poY[i + j].y - poY[i].y;
-        tempX = abs(poY[i + j].x - poY[i].x);
-        if tempY >= mini:
-            break;
-        if (tempX <= mini):
-            ans = (tempX ** 2 + tempY ** 2);
-            if ans < rtn:
-                rtn = ans;
-                mini = rtn ** 0.5;
-        j += 1;
-        if i + j == n:
-            break;
-
-
-
-
-"""
-
-
-
-xmin = 10000;
-for i in range(1, n - 1):
-    tempX = poX[i + 1].x - poX[i].x;
-    if (tempX <= xmin and abs(poX[i + 1].y - poX[i].y) <= xmin):
-        tempmin = (tempX ** 2 + (poX[i + 1].y - poX[i].y) ** 2) ** 0.5;
-        if (tempmin < xmin):
-            xmin = tempmin;
-
-ymin = 10000;
-yindex = 0;
-for i in range(1, n - 1):
-    tempY = poY[i + 1].y - poY[i].y;
-    if (tempY <= ymin and abs(poY[i + 1].x - poY[i].x) <= ymin):
-        tempmin = (tempY ** 2 + (poY[i + 1].x - poY[i].x) ** 2) ** 0.5;
-        if (tempmin < ymin):
-            ymin = tempmin;
-
-
-#xmin *= 2 ** 0.5;
-#ymin *= 2 ** 0.5;
-
-xmin = int(xmin) + 1;
-ymin = int(ymin) + 1;
-
-
-mini = min(xmin,ymin);
-
-
-rtn = (poX[1].x - poX[0].x) ** 2 + (poX[1].y - poX[0].y) ** 2;
-for i in range(0, n - 1):
-    j = 1;
-    while (1):
-        tempX = poX[i + j].x - poX[i].x;
-        if tempX >= mini:
-            break;
-        elif abs(poX[i + j].y - poX[i].y) <= mini:
-            ans = (tempX) ** 2 + (poX[i + j].y - poX[i].y) ** 2;
-            if ans < rtn:
-                rtn = ans;
-        j += 1;
-        if i + j == n:
-            break;
-
-for i in range(0, n - 1):
-    j = 1;
-    while (1):
-        tempY = poY[i + j].y - poY[i].y;
-        if tempY >= mini:
-            break;
-        elif abs(poY[i + j].x - poY[i].x) <= mini:
-            ans = (tempY) ** 2 + (poY[i + j].x - poY[i].x) ** 2;
-            if ans < rtn:
-                rtn = ans;
-        j += 1;
-        if i + j == n:
-            break;            
-
-"""
-        
 print(rtn);
