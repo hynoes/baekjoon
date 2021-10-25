@@ -1,3 +1,4 @@
+#실패
 # 분할정복을 처음부터 공부해보자
 
 # (sorted, key, **를 배웠다)
@@ -54,89 +55,175 @@
 #아이디어 4
 # 새로운 mini를 구할 때 마다 처음부터 시작(진행상황을 저장하기 어려움), 가로세로 2mini 만큼 쪼개서 진행. 2mini의 열벡터단위로 진행, 열벡터는 다시 2mini씩 세로로 쪼개짐.
 # nextStart위치 잘 선정하기, 코드보수결과 10프로까지 도달했는데 틀림
-# append에서 미리선언으로 바꿨는데 오히려 살짝 느려진듯.
+# mini,rtn,absum이 갱신될 때 더 작은 mini를 가지고 현재의 i값에서 0부터 다시 시작하기 (x축 폭이 좁아져서 중복되는 연산이 소수 있더라도 제외하는 연산이 더 많을 확률이 훨씬 높아서 이득인듯)
+
+#아이디어 4.1
+# xmin,ymin을 구해서 mini로 사용하고 시작하기 -> 왠지 모르겠는데 계속 오류뜸
+
+#아이디어 4.2
+# 작은 rtn, mini값부터 시작하고 못찾으면 다시 올리기 -> 전체적인 루프는 많이 증가했지만, 일관된 속도를 얻을 수 있을것으로 기대 -> 11프로까지 빠르게 통과후 실패
+
+#3가지 생략 아이디어. 
+# 작은 mini, rtn값부터 올려가면서 작은해가 존재할 때 빠르게 찾기.
+# 두점간의 거리가 mini보다 "크면" 수직한상황에서도 rtn값이 기존값보다 크므로 생략하기
+# 이등변직각삼각형으로 제곱연산보다 빠르게 비교해서 제거하기 (면적이 아주 비슷하기 때문에 유용함)
+
+#아이디어 4.3
+# 2mini단위로 구간을 자를 때 마지막점뒤에 같은 x값을 가지는 점이 많을 경우 위험할 수 있는 생략이 됨 -> 그러한 점들을 모두 section에 추가함
+
+#아이디어 5
+# x가 같은 점이 몰리는 문제를 더 추가해서 해결하기 보다는, before Value~ beforeValue + 2 * mini 를 사용해서 poX를 section으로 분할하기
+# mini가 갱신 될 경우도 유효함
+# 구현하시오
 
 
 
 import copy
+import sys
 
 class point:
     def __init__(self, coor):
         self.x = int(coor[0]);
         self.y = int(coor[1]);
 
-"""
-f = open("baekjoon/case2261_3.txt", "r");
 
-n = int(f.readline());
+
+# f = open("baekjoon/case2261_4.txt", "r");
+# n = int(f.readline());
+# po = [point([0, 0])] * n;
+# for i in range(0,n):
+#     po[i] = point(f.readline().split());
+
+
+n = int(sys.stdin.readline());
 po = [point([0, 0])] * n;
 for i in range(0,n):
-    po[i] = point(f.readline().split());
-"""
-
-n = int(input());
-po = [point([0, 0])] * n;
-for i in range(0,n):
-    po[i] = point(input().split());
+    po[i] = point(sys.stdin.readline().split());
 
 
 
 poX = sorted(po,key=lambda point: point.x);
-#poY = sorted(po,key=lambda point: point.y);
+poY = sorted(po,key=lambda point: point.y);
 
 
-rtn = (poX[1].x-poX[0].x) ** 2 + (poX[1].y - poX[0].y) ** 2;
-mini = rtn ** 0.5 + 0.0001;
-absum = mini ** 1.4143;
 
 
-endFlag = 0;
-resetFlag = 0;
-nextStart = 0;
-start = 0;
+#rtn = (poX[1].x-poX[0].x) ** 2 + (poX[1].y - poX[0].y) ** 2;
+#mini = rtn ** 0.5 + 0.0001;
+#absum = mini ** 1.4143;
 
-time = 0;
-
-while (i < n):
-    i = nextStart;
-    m = 1;
-    if (resetFlag == 0):
-        i = 0;
-    resetFlag = 1;
-    nextFlag = 1;
-    while (i + m < n and poX[i + m].x - poX[i].x < mini * 1.1):
-        if (nextFlag and poX[i + m].x - poX[i].x > mini * 0.9):
-            nextStart = i + m;
-            nextFlag = 0;
-        m += 1;
-    section = [point([0, 0])] * m;
-    for r in range(0, m):
-        section[r] = poX[r + i];
-
-    section = sorted(section, key=lambda point: point.y);
-    j = 0;
-    while (j < len(section) - 1 and resetFlag):
-        k = 1;
-        while(resetFlag):
-            time += 1;
-            tempY = section[j + k].y - section[j].y;
-            if (tempY > mini):
-                break;
-            tempX = abs(section[j + k].x - section[j].x);
-            if (tempX + tempY < absum):
-                ans = (tempX ** 2 + tempY ** 2);
-                if ans < rtn:
-                    rtn = ans;
-                    mini = rtn ** 0.5 + 0.0001;
-                    absum = mini * 1.4143;
-                    resetFlag = 0;
-            k += 1;
-            if (j + k == len(section)):
-                break;
+i = 0;
+while (i < n - 1):
+    j = 1;
+    while i + j < n and poX[i + j].x - poX[i].x == 0:
+        if poX[i + j].y - poX[i].y == 0:
+            print(0);
+            quit();
         j += 1;
-    
-    if nextFlag == 1 and resetFlag == 1:
+    i += j - 1;
+    i += 1;
+i = 0;
+j = 0;
+
+
+
+
+time1 = 0;
+time2 = 0;
+time3 = 0;
+time4 = 0;
+time5 = 0;
+
+
+rtn = 1;
+mini = 1;
+absum = mini * 1.4143;
+
+beforeValue = 0;
+
+while (1):
+    ansFlag = 0;
+    i = 0;
+    resetFlag = 1;
+    nextStart = 0;
+    while (beforeValue < poX[n - 1].x - poX[0].x):
+        time1 += 1;
+        
+        if (resetFlag == 1): ## 리셋되지 않음
+            i = nextStart;
+        resetFlag = 1;
+        # nextFlag = 1;
+        # m = 1;
+        # section = [];
+        # if (i - 1 > 0):
+        #     section.append(poX[i - 1]);
+        # section.append(poX[i]);
+        # while (i + m < n and poX[i + m].x - poX[i].x < mini * 2):
+        #     if (nextFlag and poX[i + m].x - poX[i].x > mini * 1):
+        #         nextStart = i + m;
+        #         nextFlag = 0;
+        #     section.append(poX[i + m]);
+        #     m += 1;
+        #     time2 += 1;
+        # q = 0;
+        # while (i + m + q < n and poX[i + m] == poX[i + m + q]):
+        #     section.append(poX[i + m + q]);
+        #     q += 1;
+        while (poX[i + nextStart].x < beforeValue * mini):
+            nextStart += 1;
+        
+        sectionCountIndex = 0;
+        while (poX[i + sectionCountIndex].x < beforeValue + 2.01 * mini):
+            section.append(poX[i + sectionCountIndex]);
+            sectionCountIndex += 1;
+
+        section = sorted(section, key=lambda point: point.y);
+        j = 0;
+        while (j < len(section) - 1 and resetFlag):
+            k = 1;
+            time3+= 1;
+            while(resetFlag):
+                time4 += 1;
+                tempY = section[j + k].y - section[j].y;
+                if (tempY > mini):
+                    break;
+                tempX = abs(section[j + k].x - section[j].x);
+                if (tempX + tempY < absum):
+                    time5 += 1;
+                    ans = (tempX ** 2 + tempY ** 2);
+                    if ans < rtn:
+                        rtn = ans;
+                        mini = rtn ** 0.5 + 0.0001;
+                        absum = mini * 1.4143;
+                        resetFlag = 0;
+                        ansFlag = 1;
+                        # print(rtn);
+                        # print('time1:',time1);
+                        # print('time2:',time2);
+                        # print('time3:',time3);  
+                        # print('time4:',time4);
+                        # print('time5:',time5);
+                    elif ans == rtn:
+                        ansFlag = 1;
+                k += 1;
+                if (j + k == len(section)):
+                    break;
+            j += 1;
+        
+        if resetFlag == 1:
+            break;
+    if ansFlag == 1:
         break;
+    else:
+        rtn *= 100;
+        mini *= 10;
+        absum = mini * 1.4143;
+
 
 print(rtn);
-#print('time:',time);
+quit();
+# print('time1:',time1);
+# print('time2:',time2);
+# print('time3:',time3);
+# print('time4:',time4);
+# print('time5:',time5);
