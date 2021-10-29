@@ -73,8 +73,20 @@
 
 #아이디어 5
 # x가 같은 점이 몰리는 문제를 더 추가해서 해결하기 보다는, before Value~ beforeValue + 2 * mini 를 사용해서 poX를 section으로 분할하기
-# mini가 갱신 될 경우도 유효함
+# mini가 갱신 될 경우도 유효함 (myrtn = 100 일 때 mymini 10보다 같거나 작은 모든 관계에 대해서 탐색했다면, 10이하의 답이 없다는 것이 보증되므로 )
 # 구현하시오
+
+#아이디어 5.1 (최적화)
+# 이미 확인한 간격에 대해 추가로 확인 할 필요가 없는 최소치를 부여해서 연산을 아낌
+# 하지만 구간탐색간격을 매번 크게 증가시키면 중복검색하는 점의 양이 전체에 비해 작은 양이므로 무시해도됨 (등비수열의합)
+# 성능이 부족할 경우에만 추가로 구현하기
+# myrtn 은 최초1로 제시 mymini = 1, myabsum = 1.4
+# myrtn 을 n배한다면 ...
+
+#아이디어 5.2
+# 구간은 겹쳐져야함. 구간에 들어가지않는 인접한 점은 추가 할 필요가 없음!
+# 2차원 section을 사용하기. 0<=x<=2n 이면 0 n<=x<=3n이면 1에 넣기 (핵심기술)
+
 
 
 
@@ -95,16 +107,70 @@ class point:
 #     po[i] = point(f.readline().split());
 
 
-n = int(sys.stdin.readline());
+n = int(input());
 po = [point([0, 0])] * n;
 for i in range(0,n):
-    po[i] = point(sys.stdin.readline().split());
+    po[i] = point(input().split());
 
 
 
 poX = sorted(po,key=lambda point: point.x);
 poY = sorted(po,key=lambda point: point.y);
 
+## --------------- 여기까지 입력 ----------------------
+
+areaSize = 1;
+beforeAreaSize = 0;
+beforeAbsum = 0;
+rtn = 100000000000000;
+endFlag = 0;
+while (endFlag == 0):
+    areaSize *= 20;
+    absum = areaSize * 1.4143;
+    oddLimit = poX[0].x + areaSize;
+    evenLimit = poX[0].x + areaSize * 2;
+    section = [];
+    section.append([]);
+    for i in range(0,len(poX)):
+        while (poX[i].x > oddLimit):
+            oddLimit += areaSize * 2;
+            section.append([]);
+        section[len(section) - 1].append(poX[i]);
+    section.append([]);
+    for i in range(0,len(poX)):
+        while (poX[i].x > evenLimit):
+            evenLimit += areaSize * 2;
+            section.append([]);
+        section[len(section) - 1].append(poX[i]);
+    for i in range(0,len(section)):
+        section[i] = sorted(section[i],key=lambda point: point.y);
+        for j in range(0,len(section[i]) - 1):
+            k = 0;
+            while (1):
+                k += 1;
+                if (j + k == len(section[i])):
+                    break;
+                tempY = section[i][j + k].y - section[i][j].y;
+                if (tempY > areaSize):
+                    break;
+                tempX = abs(section[i][j + k].x - section[i][j].x);
+                if tempX + tempY < beforeAbsum:
+                    continue;
+                if tempX + tempY < absum:
+                    ans = (tempX ** 2 + tempY ** 2);
+                    if ans < rtn:
+                        rtn = ans;
+                        areaSize = rtn ** 0.5 + 0.0001;
+                        absum = areaSize * 1.4143;
+                        endFlag = 1;
+
+    beforeAreaSize = areaSize;
+    beforeAbsum = areaSize * 1.4143;
+    
+print(rtn);   
+
+
+"""
 
 
 
@@ -227,3 +293,5 @@ quit();
 # print('time3:',time3);
 # print('time4:',time4);
 # print('time5:',time5);
+
+"""
