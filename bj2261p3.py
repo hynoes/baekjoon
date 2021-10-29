@@ -1,4 +1,4 @@
-#실패
+#성공
 # 분할정복을 처음부터 공부해보자
 
 # (sorted, key, **를 배웠다)
@@ -117,19 +117,31 @@
 #아이디어 5.7
 # odd limit과 even limit이 필요한가? 그냥 limit으로 통일하고 번갈아가며 section을 함수에 넣기
 
+#성공
+# 아이디어5.7
+# 3배, 4배, 10배중 빠른 속도 비교해보기 (논리적으로 낮을수록 유리한 것 같은데...)
+# 3배 1332ms, 4배 1112ms, 5배 1164ms, 8배 1304ms
+
+#종합
+# 제곱연산을 하기 전에 정사각형과 이등변삼각형을 우선 확인해서, 복잡한 연산의 횟수 줄이기
+# 같은점이 아주 많으면 n^2의 시간복잡도가 발생하므로 우선 확인해서 예외처리 해주기
+# oddSection과 evenSection을 같이 채워나가면서 limit에 걸릴때마다 번갈아가면서 search해주고, 이때 areaSize가 작게 갱신되더라도 누락되는 부분이 존재하지 않음.
+# 작은 거리만 우선적으로 탐색해서 해가 존재하지 않음을 확인하면 그 다음에는 좀 더 큰거리에 대해서 해가 존재하지 않는지 확인하기. 
+# 너무많은 반복문 vs 너무 넓은 탐색거리로 인한 많은 경우의수 의 적절한 중간값은 4로 추정
+
+
 
 
 
 import copy
 import sys
-
 class point:
     def __init__(self, coor):
         self.x = int(coor[0]);
         self.y = int(coor[1]);
 
 
-def search(section,endFlag,rtn,areaSize,absum):
+def search(section,endFlag,rtn,areaSize,absum): #범위내의 
     section = sorted(section,key=lambda point: point.y);
     for j in range(0,len(section) - 1):
         k = 0;
@@ -141,8 +153,6 @@ def search(section,endFlag,rtn,areaSize,absum):
             if (tempY > areaSize):
                 break;
             tempX = abs(section[j + k].x - section[j].x);
-            # if (0 and tempX <= beforeAreaSize and tempY <= beforeAreaSize):
-            #     continue;
             if tempX <= areaSize  and tempX + tempY < absum:
                 ans = (tempX ** 2 + tempY ** 2);
                 if ans < rtn:
@@ -152,34 +162,12 @@ def search(section,endFlag,rtn,areaSize,absum):
                     endFlag = 1;
     return endFlag, rtn, areaSize;
 
-
-
-
-
-
-f = open("baekjoon/case2261_1.txt", "r");
-n = int(f.readline());
+n = int(sys.stdin.readline());
 po = [point([0, 0])] * n;
 for i in range(0,n):
-    po[i] = point(f.readline().split());
-
-
-# n = int(input());
-# po = [point([0, 0])] * n;
-# for i in range(0,n):
-#     po[i] = point(input().split());
-
-# n = int(sys.stdin.readline());
-# po = [point([0, 0])] * n;
-# for i in range(0,n):
-#     po[i] = point(sys.stdin.readline().split());
-
-
+    po[i] = point(sys.stdin.readline().split());
 
 poX = sorted(po,key=lambda point: point.x);
-poY = sorted(po,key=lambda point: point.y);
-
-## --------------- 여기까지 입력 ----------------------
 
 i = 0;
 while (i < n - 1):
@@ -196,17 +184,12 @@ j = 0;
 
 areaSize = 1;
 beforeAreaSize = 0;
-#global beforeAbsum;
-#beforeAbsum = 0;
-
 rtn = 1;
 endFlag = 0;
 
-
-
 while (endFlag == 0):
-    areaSize *= 10;
-    rtn *= 100;
+    areaSize *= 5;
+    rtn *= 25;
     absum = areaSize * 1.4143;
     limit = poX[0].x + areaSize;
     oddEvenFlag = 0;
@@ -228,130 +211,3 @@ while (endFlag == 0):
     endFlag, rtn, areaSize = search(oddSection,endFlag,rtn,areaSize,absum);
     endFlag, rtn, areaSize = search(evenSection,endFlag,rtn,areaSize,absum);
 print(rtn);   
-
-
-"""
-
-
-
-#rtn = (poX[1].x-poX[0].x) ** 2 + (poX[1].y - poX[0].y) ** 2;
-#mini = rtn ** 0.5 + 0.0001;
-#absum = mini ** 1.4143;
-
-i = 0;
-while (i < n - 1):
-    j = 1;
-    while i + j < n and poX[i + j].x - poX[i].x == 0:
-        if poX[i + j].y - poX[i].y == 0:
-            print(0);
-            quit();
-        j += 1;
-    i += j - 1;
-    i += 1;
-i = 0;
-j = 0;
-
-
-
-
-time1 = 0;
-time2 = 0;
-time3 = 0;
-time4 = 0;
-time5 = 0;
-
-
-rtn = 1;
-mini = 1;
-absum = mini * 1.4143;
-
-beforeValue = 0;
-
-while (1):
-    ansFlag = 0;
-    i = 0;
-    resetFlag = 1;
-    nextStart = 0;
-    while (beforeValue < poX[n - 1].x - poX[0].x):
-        time1 += 1;
-        
-        if (resetFlag == 1): ## 리셋되지 않음
-            i = nextStart;
-        resetFlag = 1;
-        # nextFlag = 1;
-        # m = 1;
-        # section = [];
-        # if (i - 1 > 0):
-        #     section.append(poX[i - 1]);
-        # section.append(poX[i]);
-        # while (i + m < n and poX[i + m].x - poX[i].x < mini * 2):
-        #     if (nextFlag and poX[i + m].x - poX[i].x > mini * 1):
-        #         nextStart = i + m;
-        #         nextFlag = 0;
-        #     section.append(poX[i + m]);
-        #     m += 1;
-        #     time2 += 1;
-        # q = 0;
-        # while (i + m + q < n and poX[i + m] == poX[i + m + q]):
-        #     section.append(poX[i + m + q]);
-        #     q += 1;
-        while (poX[i + nextStart].x < beforeValue * mini):
-            nextStart += 1;
-        
-        sectionCountIndex = 0;
-        while (poX[i + sectionCountIndex].x < beforeValue + 2.01 * mini):
-            section.append(poX[i + sectionCountIndex]);
-            sectionCountIndex += 1;
-
-        section = sorted(section, key=lambda point: point.y);
-        j = 0;
-        while (j < len(section) - 1 and resetFlag):
-            k = 1;
-            time3+= 1;
-            while(resetFlag):
-                time4 += 1;
-                tempY = section[j + k].y - section[j].y;
-                if (tempY > mini):
-                    break;
-                tempX = abs(section[j + k].x - section[j].x);
-                if (tempX + tempY < absum):
-                    time5 += 1;
-                    ans = (tempX ** 2 + tempY ** 2);
-                    if ans < rtn:
-                        rtn = ans;
-                        mini = rtn ** 0.5 + 0.0001;
-                        absum = mini * 1.4143;
-                        resetFlag = 0;
-                        ansFlag = 1;
-                        # print(rtn);
-                        # print('time1:',time1);
-                        # print('time2:',time2);
-                        # print('time3:',time3);  
-                        # print('time4:',time4);
-                        # print('time5:',time5);
-                    elif ans == rtn:
-                        ansFlag = 1;
-                k += 1;
-                if (j + k == len(section)):
-                    break;
-            j += 1;
-        
-        if resetFlag == 1:
-            break;
-    if ansFlag == 1:
-        break;
-    else:
-        rtn *= 100;
-        mini *= 10;
-        absum = mini * 1.4143;
-
-
-print(rtn);
-quit();
-# print('time1:',time1);
-# print('time2:',time2);
-# print('time3:',time3);
-# print('time4:',time4);
-# print('time5:',time5);
-
-"""
