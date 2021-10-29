@@ -107,6 +107,7 @@
 
 #아이디어 5.5
 # 탐색방법을 아이디어4로 다시 바꾸기
+# 작은 rtn을 찾는 즉시 areaSize(mini)를 줄일 수 있는 것이 중요할지도??
 
 
 
@@ -138,26 +139,32 @@ def search(section,endFlag,rtn,areaSize,absum):
                 ans = (tempX ** 2 + tempY ** 2);
                 if ans < rtn:
                     rtn = ans;
-                    if rtn ** 0.5 + 0.0001 < areaSize:
-                        areaSize = rtn ** 0.5 + 0.0001;
-                        absum = areaSize * 1.4143;
+                    areaSize = rtn ** 0.5 + 0.0001;
+                    absum = areaSize * 1.4143;
                     endFlag = 1;
     return endFlag, rtn, areaSize;
 
 
 
 
-# f = open("baekjoon/case2261_4.txt", "r");
-# n = int(f.readline());
-# po = [point([0, 0])] * n;
-# for i in range(0,n):
-#     po[i] = point(f.readline().split());
 
 
-n = int(input());
+f = open("baekjoon/case2261_1.txt", "r");
+n = int(f.readline());
 po = [point([0, 0])] * n;
 for i in range(0,n):
-    po[i] = point(input().split());
+    po[i] = point(f.readline().split());
+
+
+# n = int(input());
+# po = [point([0, 0])] * n;
+# for i in range(0,n):
+#     po[i] = point(input().split());
+
+# n = int(sys.stdin.readline());
+# po = [point([0, 0])] * n;
+# for i in range(0,n):
+#     po[i] = point(sys.stdin.readline().split());
 
 
 
@@ -166,16 +173,32 @@ poY = sorted(po,key=lambda point: point.y);
 
 ## --------------- 여기까지 입력 ----------------------
 
+i = 0;
+while (i < n - 1):
+    j = 1;
+    while i + j < n and poX[i + j].x - poX[i].x == 0:
+        if poX[i + j].y - poX[i].y == 0:
+            print(0);
+            quit();
+        j += 1;
+    i += j - 1;
+    i += 1;
+i = 0;
+j = 0;
+
 areaSize = 1;
 beforeAreaSize = 0;
 #global beforeAbsum;
 #beforeAbsum = 0;
 
-rtn = 100000000000000;
+rtn = 1;
 endFlag = 0;
 
+
+
 while (endFlag == 0):
-    areaSize *= 5;
+    areaSize *= 10;
+    rtn *= 100;
     absum = areaSize * 1.4143;
     oddLimit = poX[0].x + areaSize;
     evenLimit = poX[0].x + areaSize * 2;
