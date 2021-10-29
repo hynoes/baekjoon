@@ -112,6 +112,10 @@
 #아이디어 5.6
 # 7프로의 벽은 같은값이 무수히 많을 때 무한히 검색하는 문제였고 중복점을 삭제해서 해결했음.
 # 16프로에서 틀리는데 아마 아이디어 5.4의 생략문제가 아닐까 생각이듬 이것을 수정할 것.
+# 수정결과 14프로에서 틀림.
+
+#아이디어 5.7
+# odd limit과 even limit이 필요한가? 그냥 limit으로 통일하고 번갈아가며 section을 함수에 넣기
 
 
 
@@ -204,21 +208,21 @@ while (endFlag == 0):
     areaSize *= 10;
     rtn *= 100;
     absum = areaSize * 1.4143;
-    oddLimit = poX[0].x + areaSize;
-    evenLimit = poX[0].x + areaSize * 2;
+    limit = poX[0].x + areaSize;
+    oddEvenFlag = 0;
     oddSection = [];
     evenSection = [];
     for i in range(0,len(poX)):
-        if (poX[i].x > oddLimit):
-            endFlag, rtn, areaSize = search(oddSection,endFlag,rtn,areaSize,absum);
-            oddSection = [];
-            while (poX[i].x > oddLimit):
-                oddLimit += areaSize * 2;
-        if (poX[i].x > evenLimit):
-            endFlag, rtn, areaSize = search(evenSection,endFlag,rtn,areaSize,absum);
-            evenSection = [];
-            while (poX[i].x > oddLimit):
-                oddLimit += areaSize * 2;
+        if (poX[i].x > limit):
+            if (oddEvenFlag == 0):
+                endFlag, rtn, areaSize = search(oddSection,endFlag,rtn,areaSize,absum);
+                oddSection = [];
+                oddEvenFlag = 1;
+            else:
+                endFlag, rtn, areaSize = search(evenSection,endFlag,rtn,areaSize,absum);
+                evenSection = [];
+                oddEvenFlag = 0;
+            limit += areaSize;
         oddSection.append(poX[i]);
         evenSection.append(poX[i]);
     endFlag, rtn, areaSize = search(oddSection,endFlag,rtn,areaSize,absum);
