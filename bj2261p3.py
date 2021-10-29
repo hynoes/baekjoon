@@ -87,6 +87,27 @@
 # 구간은 겹쳐져야함. 구간에 들어가지않는 인접한 점은 추가 할 필요가 없음!
 # 2차원 section을 사용하기. 0<=x<=2n 이면 0 n<=x<=3n이면 1에 넣기 (핵심기술)
 
+#아이디어 5.3
+# 기존아이디어도 추가하기, areaSize는 정사각형범위를 의미하지만, 유효한 답을 찾을 경우
+# 앞으로 추가적으로 탐색할 때 더 작은 areaSize를 찾을 수 있도록.
+# 정사각형범위검색, 이미 탐색한 작은 정사각형에 대해 예외처리
+# 논리적으로 작은 정사각형에 답이 있으면 큰 정사각형에 답이 필요 없으므로 작은 정사각형부터 탐색
+# 그런데 어떻게 시간초과야 씨발롬아
+
+#용어정리
+# areaSize는 현재 검색에서 찾을 수 있는 가장 큰 선분길이
+# beforeAreaSize는 0부터 값까지 검색완료가 보증된 값
+# absum과 areaSize의 이등변삼각형, 정사각형차이는 그렇게 크지 않아보이므로 사용하지않음
+
+#아이디어 5.4
+# areaSize로 poX를 자를 때 반드시 areaSize로 엇박이 나야 하는데 만약에 중간에 areaSize를 갱신하면 그렇지 않게 된다.
+# 새로운 areaSize를 발견하면 더이상 areaSize를 키우지 않고 남은 검색을 끝내고 종료하므로 오류가 발생할 위험이 있음.
+# 해결법 -> odd와 even을 동시에 진행해야함
+# 하지만 지금은 시간초과 해결이 우선이기에 적용하지 않음
+
+#아이디어 5.5
+# 탐색방법을 아이디어4로 다시 바꾸기
+
 
 
 
@@ -97,6 +118,32 @@ class point:
     def __init__(self, coor):
         self.x = int(coor[0]);
         self.y = int(coor[1]);
+
+
+def search(section,endFlag,rtn,areaSize,absum):
+    section = sorted(section,key=lambda point: point.y);
+    for j in range(0,len(section) - 1):
+        k = 0;
+        while (1):
+            k += 1;
+            if (j + k == len(section)):
+                break;
+            tempY = section[j + k].y - section[j].y;
+            if (tempY > areaSize):
+                break;
+            tempX = abs(section[j + k].x - section[j].x);
+            # if (0 and tempX <= beforeAreaSize and tempY <= beforeAreaSize):
+            #     continue;
+            if tempX <= areaSize  and tempX + tempY < absum:
+                ans = (tempX ** 2 + tempY ** 2);
+                if ans < rtn:
+                    rtn = ans;
+                    if rtn ** 0.5 + 0.0001 < areaSize:
+                        areaSize = rtn ** 0.5 + 0.0001;
+                        absum = areaSize * 1.4143;
+                    endFlag = 1;
+    return endFlag, rtn, areaSize;
+
 
 
 
@@ -121,52 +168,37 @@ poY = sorted(po,key=lambda point: point.y);
 
 areaSize = 1;
 beforeAreaSize = 0;
-beforeAbsum = 0;
+#global beforeAbsum;
+#beforeAbsum = 0;
+
 rtn = 100000000000000;
 endFlag = 0;
+
 while (endFlag == 0):
-    areaSize *= 20;
+    areaSize *= 5;
     absum = areaSize * 1.4143;
     oddLimit = poX[0].x + areaSize;
     evenLimit = poX[0].x + areaSize * 2;
     section = [];
-    section.append([]);
     for i in range(0,len(poX)):
-        while (poX[i].x > oddLimit):
-            oddLimit += areaSize * 2;
-            section.append([]);
-        section[len(section) - 1].append(poX[i]);
-    section.append([]);
+        if (poX[i].x > oddLimit):
+            endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
+            section = [];
+            while (poX[i].x > oddLimit):
+                oddLimit += areaSize * 2;
+        section.append(poX[i]);
+    endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
+    section = [];
     for i in range(0,len(poX)):
-        while (poX[i].x > evenLimit):
-            evenLimit += areaSize * 2;
-            section.append([]);
-        section[len(section) - 1].append(poX[i]);
-    for i in range(0,len(section)):
-        section[i] = sorted(section[i],key=lambda point: point.y);
-        for j in range(0,len(section[i]) - 1):
-            k = 0;
-            while (1):
-                k += 1;
-                if (j + k == len(section[i])):
-                    break;
-                tempY = section[i][j + k].y - section[i][j].y;
-                if (tempY > areaSize):
-                    break;
-                tempX = abs(section[i][j + k].x - section[i][j].x);
-                if tempX + tempY < beforeAbsum:
-                    continue;
-                if tempX + tempY < absum:
-                    ans = (tempX ** 2 + tempY ** 2);
-                    if ans < rtn:
-                        rtn = ans;
-                        areaSize = rtn ** 0.5 + 0.0001;
-                        absum = areaSize * 1.4143;
-                        endFlag = 1;
-
+        if (poX[i].x > evenLimit):
+            endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
+            section = [];
+            while (poX[i].x > evenLimit):
+                evenLimit += areaSize * 2;
+        section.append(poX[i]);
+    endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
+    section = [];
     beforeAreaSize = areaSize;
-    beforeAbsum = areaSize * 1.4143;
-    
 print(rtn);   
 
 
