@@ -109,6 +109,10 @@
 # 탐색방법을 아이디어4로 다시 바꾸기
 # 작은 rtn을 찾는 즉시 areaSize(mini)를 줄일 수 있는 것이 중요할지도??
 
+#아이디어 5.6
+# 7프로의 벽은 같은값이 무수히 많을 때 무한히 검색하는 문제였고 중복점을 삭제해서 해결했음.
+# 16프로에서 틀리는데 아마 아이디어 5.4의 생략문제가 아닐까 생각이듬 이것을 수정할 것.
+
 
 
 
@@ -202,26 +206,23 @@ while (endFlag == 0):
     absum = areaSize * 1.4143;
     oddLimit = poX[0].x + areaSize;
     evenLimit = poX[0].x + areaSize * 2;
-    section = [];
+    oddSection = [];
+    evenSection = [];
     for i in range(0,len(poX)):
         if (poX[i].x > oddLimit):
-            endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
-            section = [];
+            endFlag, rtn, areaSize = search(oddSection,endFlag,rtn,areaSize,absum);
+            oddSection = [];
             while (poX[i].x > oddLimit):
                 oddLimit += areaSize * 2;
-        section.append(poX[i]);
-    endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
-    section = [];
-    for i in range(0,len(poX)):
         if (poX[i].x > evenLimit):
-            endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
-            section = [];
-            while (poX[i].x > evenLimit):
-                evenLimit += areaSize * 2;
-        section.append(poX[i]);
-    endFlag, rtn, areaSize = search(section,endFlag,rtn,areaSize,absum);
-    section = [];
-    beforeAreaSize = areaSize;
+            endFlag, rtn, areaSize = search(evenSection,endFlag,rtn,areaSize,absum);
+            evenSection = [];
+            while (poX[i].x > oddLimit):
+                oddLimit += areaSize * 2;
+        oddSection.append(poX[i]);
+        evenSection.append(poX[i]);
+    endFlag, rtn, areaSize = search(oddSection,endFlag,rtn,areaSize,absum);
+    endFlag, rtn, areaSize = search(evenSection,endFlag,rtn,areaSize,absum);
 print(rtn);   
 
 
