@@ -1,0 +1,10 @@
+a, b = input().split();
+
+a = int(a);
+b = int(b);
+
+for i in range (0, a):
+    print(a, end='');
+print('');
+for i in range (0, b):
+    print(b, end='');
